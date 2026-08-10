@@ -245,6 +245,9 @@ select.status-select{
 .staff-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
 @media(max-width:820px){.staff-grid{grid-template-columns:1fr;}}
 .staff-list{display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto;}
+.staff-unit-group{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+.staff-unit-group:last-child{margin-bottom:0;}
+.staff-unit-heading{padding-bottom:2px; border-bottom:1px dashed var(--line);}
 .staff-item{display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--surface-2); border-radius:8px; border:1px solid var(--line); flex-wrap:wrap;}
 .staff-avatar{
   width:32px;height:32px;border-radius:50%; background:var(--red-soft); color:var(--red-dark); font-weight:700;
@@ -270,6 +273,17 @@ select.status-select{
 }
 
 .foot-note{margin-top:28px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-faint); text-align:center;}
+.quicklinks-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px;}
+.quicklink-item{
+  display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:10px; text-decoration:none; color:var(--ink);
+  font-size:12.5px; font-weight:600; line-height:1.3; transition:all .15s ease;
+}
+.quicklink-item:hover{border-color:var(--red); background:var(--red-soft); color:var(--red-dark); transform:translateY(-1px); box-shadow:var(--shadow);}
+.ql-icon{font-size:18px; flex:none;}
+.ql-label{flex:1;}
+.ql-arrow{flex:none; opacity:.45; font-size:13px;}
+.quicklink-item:hover .ql-arrow{opacity:1;}
 
 @media print{
   .topbar, .tabs, .toolbar, .col-actions, .no-print{display:none !important;}
@@ -348,6 +362,23 @@ const FULL_ACCESS_TITLES = ['Chủ tịch UBND xã','Phó Chủ tịch UBND xã'
 function unitOf(id){ return UNITS.find(u=>u.id===id); }
 function unitType(id){ const u = unitOf(id); return u ? u.type : 'phong'; }
 function roleOptionsFor(unitId){ return ROLE_OPTIONS_BY_TYPE[unitType(unitId)] || ROLE_OPTIONS_BY_TYPE.phong; }
+/* Sắp xếp cán bộ theo Phòng, ban (đúng thứ tự UBND → Văn phòng → các phòng/trung tâm)
+   rồi theo Chức vụ (lãnh đạo cao nhất trước, chuyên viên sau cùng), cùng chức vụ thì theo tên. */
+function roleRank(s){
+  const opts = roleOptionsFor(s.dept);
+  const idx = opts.indexOf(s.chucVu);
+  return idx === -1 ? opts.length : idx;
+}
+function groupStaffByUnit(staffArr){
+  return UNITS.map(u=>{
+    const members = staffArr.filter(s=>s.dept===u.id).slice().sort((a,b)=>{
+      const r = roleRank(a) - roleRank(b);
+      if(r !== 0) return r;
+      return (a.name||'').localeCompare(b.name||'', 'vi');
+    });
+    return {unit:u, members};
+  }).filter(g=>g.members.length);
+}
 
 // alias dùng trong RAW_TASKS
 const D = {vp:'vp', hcc:'hcc', vhxh:'vhxh', kt:'kt', cu:'cudvsnc'};
@@ -993,7 +1024,33 @@ function renderOverview(){
         <div class="urge-deadline">${x.d<0? Math.abs(x.d)+' ngày quá hạn' : (x.d===0? 'Đến hạn hôm nay' : 'Còn '+x.d+' ngày')}</div>
       </div>`).join('') : `<div class="empty-state"><div class="big">Không có việc gấp</div>Hiện chưa có công việc nào quá hạn hoặc sắp đến hạn trong 3 ngày tới.</div>`}
   </div>
+
+  ${renderQuickLinks()}
   `;
+}
+
+/* ---------------- LIÊN KẾT HỆ THỐNG LIÊN QUAN ---------------- */
+const QUICK_LINKS = [
+  {icon:'📄', label:'Quản lý văn bản &amp; điều hành tỉnh Bắc Ninh', url:'https://qlvbdh.bacninh.gov.vn/dashboard'},
+  {icon:'📍', label:'Phản ánh hiện trường tỉnh Bắc Ninh', url:'https://paht.bacninh.gov.vn/'},
+  {icon:'📊', label:'Quản trị thực thi tỉnh Bắc Ninh', url:'https://qttt.bacninh.gov.vn/'},
+  {icon:'🗺️', label:'Hệ thống thông tin đất đai', url:'https://authen.mplis.gov.vn/'},
+  {icon:'🏛️', label:'Văn bản chỉ đạo điều hành tỉnh Bắc Ninh', url:'https://bacninh.gov.vn/van-ban-chi-dao-dieu-hanh'},
+  {icon:'🇻🇳', label:'Cổng dịch vụ công quốc gia', url:'https://dichvucong.gov.vn/'},
+  {icon:'📘', label:'Truyền thông xã Tân Chi', url:'https://www.facebook.com/profile.php?id=61578219980881'},
+  {icon:'🏠', label:'Cổng thông tin điện tử xã Tân Chi', url:'https://tanchi.bacninh.gov.vn/'}
+];
+function renderQuickLinks(){
+  return `
+  <div class="section-title"><h2>🔗 Liên kết hệ thống liên quan</h2><span class="hint">Mở nhanh các hệ thống của tỉnh &amp; xã</span></div>
+  <div class="card">
+    <div class="quicklinks-grid">
+      ${QUICK_LINKS.map(l=>`<a class="quicklink-item" href="${l.url}" target="_blank" rel="noopener noreferrer">
+        <span class="ql-icon">${l.icon}</span><span class="ql-label">${l.label}</span>
+        <span class="ql-arrow">↗</span>
+      </a>`).join('')}
+    </div>
+  </div>`;
 }
 
 /* ---------------- DEPT TAB ---------------- */
@@ -1092,11 +1149,9 @@ function renderTaskTable(tasks){
 /* ---------------- STAFF ---------------- */
 function unitShort(id){ const u = UNITS.find(x=>x.id===id); return u ? u.short : id; }
 function renderStaff(){
-  const byDept = {};
-  state.staff.forEach(s=>{ (byDept[s.dept] = byDept[s.dept]||[]).push(s); });
   const curUser = getCurrentUser();
   const canManageAny = canManageStaffAny();
-  const list = state.staff.length ? state.staff.map(s=>{
+  const staffItemHtml = (s)=>{
     const isLeader = s.chucVu && s.chucVu !== 'Chuyên viên';
     const canSetPin = isUBNDLeadership() || (curUser && curUser.id === s.id);
     const canDeleteThis = canManageStaffFor(s.dept);
@@ -1105,12 +1160,18 @@ function renderStaff(){
       <div class="staff-avatar">${escapeHtml((s.name||'?').trim().split(' ').slice(-1)[0][0]||'?')}</div>
       <div class="staff-info">
         <div class="staff-name">${escapeHtml(s.name)} <span class="staff-role-pill ${isLeader?'leader':'staffmember'}">${escapeHtml(s.chucVu)||'—'}</span></div>
-        <div class="staff-meta"><span class="pill-dept">${unitShort(s.dept)}</span> ${s.pinHash?'🔒 Đã đặt PIN':'⚪ Chưa đặt PIN'}</div>
+        <div class="staff-meta">${s.pinHash?'🔒 Đã đặt PIN':'⚪ Chưa đặt PIN'}</div>
       </div>
       ${canSetPin ? `<button class="btn small" data-action="set-pin" data-id="${s.id}">🔑 ${s.pinHash?'Đổi PIN':'Đặt PIN'}</button>` : ''}
       ${canDeleteThis ? `<button class="btn small danger-outline" data-action="delete-staff" data-id="${s.id}">🗑️ Xoá</button>` : ''}
     </div>`;
-  }).join('') : `<div class="empty-state"><div class="big">Chưa có cán bộ</div>Thêm danh sách cán bộ để phân công chủ trì, thực hiện chính, phối hợp cho từng công việc.</div>`;
+  };
+  const groups = groupStaffByUnit(state.staff);
+  const list = groups.length ? groups.map(g=>`
+    <div class="staff-unit-group">
+      <div class="staff-unit-heading"><span class="pill-dept">${escapeHtml(g.unit.short)}</span></div>
+      ${g.members.map(staffItemHtml).join('')}
+    </div>`).join('') : `<div class="empty-state"><div class="big">Chưa có cán bộ</div>Thêm danh sách cán bộ để phân công chủ trì, thực hiện chính, phối hợp cho từng công việc.</div>`;
 
   // Đơn vị được phép chọn khi thêm: lãnh đạo UBND chọn được tất cả; lãnh đạo đơn vị chỉ
   // chọn được đúng đơn vị mình (không thêm được cho đơn vị khác/cấp trên); danh sách
@@ -1703,12 +1764,10 @@ function renderLoginModal(){
     </div>
     </div>`;
   }
-  const groups = UNITS.map(u=>{
-    const members = state.staff.filter(s=>s.dept===u.id);
-    if(!members.length) return '';
+  const groups = groupStaffByUnit(state.staff).map(g=>{
     return `<div style="margin-bottom:10px;">
-      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); margin:10px 0 6px;">${escapeHtml(u.name)}</div>
-      ${members.map(s=>`
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-faint); margin:10px 0 6px;">${escapeHtml(g.unit.name)}</div>
+      ${g.members.map(s=>`
         <div class="login-item" data-action="do-login" data-id="${s.id}">
           <div><div class="name">${escapeHtml(s.name)}</div><div class="meta">${escapeHtml(s.chucVu)} ${s.pinHash?'🔒':''}</div></div>
           <span class="staff-role-pill ${FULL_ACCESS_TITLES.includes(s.chucVu)||s.chucVu!=='Chuyên viên'?'leader':'staffmember'}">${escapeHtml(s.chucVu)}</span>
@@ -1736,12 +1795,12 @@ function renderTaskModal(){
   const dept = editing ? editing.dept : (modalDeptDefault && allowedDepts.some(d=>d.id===modalDeptDefault) ? modalDeptDefault : allowedDepts[0].id);
   const t = editing || {linhVuc:'', noiDung:'', yeuCau:'', thoiHan:'', hanHoanThanh:'', status:'todo', chuTri:'', thucHien:'', phoiHop:'', diem:'', ghiChu:''};
   const linhVucList = [...new Set(state.tasks.filter(x=>x.dept===dept).map(x=>x.linhVuc))];
-  const deptStaff = state.staff.filter(s=>s.dept===dept);
+  const deptStaff = state.staff.filter(s=>s.dept===dept).slice().sort((a,b)=>{const r=roleRank(a)-roleRank(b); return r!==0?r:(a.name||'').localeCompare(b.name||'','vi');});
   const staffOptHtml = (selected)=> '<option value="">— Chọn cán bộ —</option>' +
     (deptStaff.length ? deptStaff.map(s=>`<option value="${escapeHtml(s.name)}" ${s.name===selected?'selected':''}>${escapeHtml(s.name)} (${escapeHtml(s.chucVu)})</option>`).join('')
       : '') ;
   const selectedCoop = (t.phoiHop||'').split(',').map(x=>x.trim()).filter(Boolean);
-  const coopStaff = state.staff.filter(s=>s.dept!=='ubnd');
+  const coopStaff = state.staff.filter(s=>s.dept!=='ubnd').slice().sort((a,b)=>{const r=roleRank(a)-roleRank(b); return r!==0?r:(a.name||'').localeCompare(b.name||'','vi');});
   const coopOptHtml = coopStaff.length
     ? coopStaff.map(s=>`<option value="${escapeHtml(s.name)}" ${selectedCoop.includes(s.name)?'selected':''}>${escapeHtml(s.name)} (${escapeHtml(s.chucVu)} · ${escapeHtml(unitShort(s.dept))})</option>`).join('')
     : '';
@@ -2029,7 +2088,7 @@ document.addEventListener('change', async (e)=>{
   if(action==='set-month'){ state.currentMonth = el.value; render(); return; }
   if(action==='modal-dept-change'){
     const dept = el.value;
-    const deptStaff = state.staff.filter(s=>s.dept===dept);
+    const deptStaff = state.staff.filter(s=>s.dept===dept).slice().sort((a,b)=>{const r=roleRank(a)-roleRank(b); return r!==0?r:(a.name||'').localeCompare(b.name||'','vi');});
     const optsHtml = '<option value="">— Chọn cán bộ —</option>' + deptStaff.map(s=>`<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)} (${escapeHtml(s.chucVu)})</option>`).join('');
     const chutriSel = document.getElementById('f-chutri');
     const thuchienSel = document.getElementById('f-thuchien');
