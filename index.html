@@ -53,7 +53,7 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 
 .topbar{
   display:flex; align-items:center; justify-content:space-between; gap:16px;
-  background:linear-gradient(180deg,#171F33,#141B2C);
+  background:linear-gradient(120deg,#1B2740 0%,#141B2C 55%,#3A1E28 100%);
   color:#fff; border-radius:14px; padding:18px 22px; box-shadow:var(--shadow);
   flex-wrap:wrap;
 }
@@ -141,7 +141,7 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 .kpi.amber .value{color:var(--amber);}
 
 .section-title{display:flex; align-items:baseline; justify-content:space-between; margin:26px 0 12px;}
-.section-title h2{font-size:17px; font-weight:600;}
+.section-title h2{font-size:17px; font-weight:600; padding-left:11px; border-left:4px solid var(--gold); border-radius:2px;}
 .section-title .hint{font-size:12px; color:var(--ink-faint);}
 
 /* dept progress bars */
@@ -572,6 +572,36 @@ function canEditDept(deptId){
   if(FULL_ACCESS_TITLES.includes(u.chucVu)) return true;
   return u.dept === deptId;
 }
+/* Riêng lãnh đạo UBND xã (Chủ tịch / Phó Chủ tịch) — không gồm lãnh đạo Văn phòng —
+   dùng cho các quyền đặc biệt: xem Nhật ký hoạt động, đặt mã PIN cho người khác. */
+function isUBNDLeadership(){
+  const u = getCurrentUser();
+  return !!(u && u.dept === 'ubnd');
+}
+/* Quản lý danh sách cán bộ — CHỈ lãnh đạo mới được thêm/xoá cán bộ, không phải ai đăng nhập
+   cũng được (tránh việc cấp dưới tự thêm/mạo danh cấp trên):
+   - Lãnh đạo UBND xã: quản lý được cán bộ ở TẤT CẢ đơn vị.
+   - Lãnh đạo từng đơn vị (Chánh/Phó Chánh VP, Trưởng/Phó Trưởng phòng, Giám đốc/Phó GĐ):
+     chỉ quản lý được cán bộ trong ĐÚNG đơn vị của mình.
+   - Chuyên viên: KHÔNG được thêm/xoá cán bộ (chỉ xem), kể cả cán bộ cùng đơn vị.
+   - Danh sách còn trống hoàn toàn: cho thêm người đầu tiên (bootstrap), để có ai đó đăng nhập được. */
+function canManageStaffFor(targetDeptId){
+  if(!state.staff || state.staff.length === 0) return true;
+  const u = getCurrentUser();
+  if(!u) return false;
+  if(isUBNDLeadership()) return true;
+  const isUnitLeader = u.chucVu && u.chucVu !== 'Chuyên viên';
+  return !!(isUnitLeader && u.dept === targetDeptId);
+}
+/* Có quản lý được cán bộ ở ÍT NHẤT một đơn vị nào đó không — dùng để quyết định
+   có hiện form "Thêm cán bộ" hay không (đơn vị cụ thể được kiểm tra lại khi bấm Lưu). */
+function canManageStaffAny(){
+  if(!state.staff || state.staff.length === 0) return true;
+  const u = getCurrentUser();
+  if(!u) return false;
+  if(isUBNDLeadership()) return true;
+  return !!(u.chucVu && u.chucVu !== 'Chuyên viên');
+}
 
 /* ---- Người cập nhật (ưu tiên lấy từ tài khoản đã đăng nhập) ---- */
 function getMyName(){
@@ -709,6 +739,17 @@ function daysUntil(task){
   const today = new Date(); today.setHours(0,0,0,0);
   return Math.round((latest-today)/86400000);
 }
+/* Sắp xếp công việc theo thứ tự thời hạn hoàn thành gần nhất trước;
+   công việc "Thường xuyên" / chưa có mốc ngày cụ thể được xếp xuống cuối. */
+function sortByDeadline(tasks){
+  return [...tasks].sort((a,b)=>{
+    const da = getDeadlineDate(a), db = getDeadlineDate(b);
+    if(da && db) return da - db;
+    if(da && !db) return -1;
+    if(!da && db) return 1;
+    return 0;
+  });
+}
 function tasksForMonth(month){ return state.tasks.filter(t=>t.month===month); }
 function statsFor(tasks){
   const total = tasks.length;
@@ -809,7 +850,8 @@ function renderTopbar(){
   const identityHtml = u
     ? `<div class="identity-badge" title="${escapeHtml(u.chucVu)} · ${escapeHtml(deptName(u.dept))}">👤 ${escapeHtml(u.name)}<span class="identity-role">${escapeHtml(u.chucVu)}</span></div>
        <button data-action="logout">🔁 Đổi người dùng</button>`
-    : `<button class="btn-primary" data-action="open-login">👤 Đăng nhập</button>`;
+    : `<div class="identity-badge" style="background:rgba(255,255,255,.06);"><span style="opacity:.85;">👁️ Chế độ khách · chỉ xem</span></div>
+       <button class="btn-primary" data-action="open-login">👤 Đăng nhập</button>`;
   return `
   <header class="topbar">
     <div class="brand">
@@ -833,9 +875,9 @@ function renderTabs(){
     {id:'overview', label:'Tổng quan'},
     ...DEPARTMENTS.map(d=>({id:d.id, label:d.short})),
     {id:'staff', label:'Cán bộ'},
-    {id:'report', label:'Báo cáo'},
-    {id:'log', label:'Nhật ký'}
+    {id:'report', label:'Báo cáo'}
   ];
+  if(isUBNDLeadership()) tabs.push({id:'log', label:'📋 Nhật ký'});
   if(isSuperAuditor()) tabs.push({id:'access', label:'🔎 Lịch sử truy cập'});
   return `<nav class="tabs">${tabs.map(t=>`<button class="tab-btn ${uiTab===t.id?'active':''}" data-action="set-tab" data-tab="${t.id}">${t.label}</button>`).join('')}</nav>`;
 }
@@ -844,7 +886,7 @@ function renderTabContent(){
   if(uiTab==='overview') return renderOverview();
   if(uiTab==='staff') return renderStaff();
   if(uiTab==='report') return renderReport();
-  if(uiTab==='log') return renderActivityLog();
+  if(uiTab==='log') return isUBNDLeadership() ? renderActivityLog() : renderOverview();
   if(uiTab==='access') return isSuperAuditor() ? renderAccessHistory() : renderOverview();
   if(DEPARTMENTS.some(d=>d.id===uiTab)) return renderDeptTab(uiTab);
   return '';
@@ -924,10 +966,10 @@ function renderOverview(){
 
   return `
   <div class="grid grid-4">
-    <div class="card kpi"><div class="label">${monthLabel(state.currentMonth)} · Tổng công việc</div><div class="value">${s.total}</div><div class="sub">trên toàn UBND xã</div></div>
-    <div class="card kpi green"><div class="label">Đã hoàn thành</div><div class="value">${s.done}</div><div class="sub">${s.pct}% tổng số công việc</div></div>
-    <div class="card kpi amber"><div class="label">Đang thực hiện</div><div class="value">${s.doing}</div><div class="sub">${s.total - s.done - s.doing} chưa bắt đầu / tạm dừng</div></div>
-    <div class="card kpi red"><div class="label">Quá hạn / cần đôn đốc</div><div class="value">${s.overdue}</div><div class="sub">so với hạn hoàn thành đã ghi</div></div>
+    <div class="card kpi"><div class="label">📋 ${monthLabel(state.currentMonth)} · Tổng công việc</div><div class="value">${s.total}</div><div class="sub">trên toàn UBND xã</div></div>
+    <div class="card kpi green"><div class="label">✅ Đã hoàn thành</div><div class="value">${s.done}</div><div class="sub">${s.pct}% tổng số công việc</div></div>
+    <div class="card kpi amber"><div class="label">🔄 Đang thực hiện</div><div class="value">${s.doing}</div><div class="sub">${s.total - s.done - s.doing} chưa bắt đầu / tạm dừng</div></div>
+    <div class="card kpi red"><div class="label">⏰ Quá hạn / cần đôn đốc</div><div class="value">${s.overdue}</div><div class="sub">so với hạn hoàn thành đã ghi</div></div>
   </div>
 
   <div class="section-title"><h2>Tiến độ theo phòng, ban</h2><span class="hint">${monthLabel(state.currentMonth)}</span></div>
@@ -966,6 +1008,7 @@ function renderDeptTab(deptId){
   }
   if(f.linhVuc) tasks = tasks.filter(t=>t.linhVuc===f.linhVuc);
   if(f.status) tasks = tasks.filter(t=>t.status===f.status);
+  tasks = sortByDeadline(tasks);
 
   const s = statsFor(state.tasks.filter(t=>t.dept===deptId && t.month===state.currentMonth));
 
@@ -1051,8 +1094,12 @@ function unitShort(id){ const u = UNITS.find(x=>x.id===id); return u ? u.short :
 function renderStaff(){
   const byDept = {};
   state.staff.forEach(s=>{ (byDept[s.dept] = byDept[s.dept]||[]).push(s); });
+  const curUser = getCurrentUser();
+  const canManageAny = canManageStaffAny();
   const list = state.staff.length ? state.staff.map(s=>{
     const isLeader = s.chucVu && s.chucVu !== 'Chuyên viên';
+    const canSetPin = isUBNDLeadership() || (curUser && curUser.id === s.id);
+    const canDeleteThis = canManageStaffFor(s.dept);
     return `
     <div class="staff-item">
       <div class="staff-avatar">${escapeHtml((s.name||'?').trim().split(' ').slice(-1)[0][0]||'?')}</div>
@@ -1060,22 +1107,27 @@ function renderStaff(){
         <div class="staff-name">${escapeHtml(s.name)} <span class="staff-role-pill ${isLeader?'leader':'staffmember'}">${escapeHtml(s.chucVu)||'—'}</span></div>
         <div class="staff-meta"><span class="pill-dept">${unitShort(s.dept)}</span> ${s.pinHash?'🔒 Đã đặt PIN':'⚪ Chưa đặt PIN'}</div>
       </div>
-      ${isSuperAuditor() ? `<button class="btn small" data-action="set-pin" data-id="${s.id}">🔑 ${s.pinHash?'Đổi PIN':'Đặt PIN'}</button>` : ''}
-      <button class="btn small danger-outline" data-action="delete-staff" data-id="${s.id}">🗑️ Xoá</button>
+      ${canSetPin ? `<button class="btn small" data-action="set-pin" data-id="${s.id}">🔑 ${s.pinHash?'Đổi PIN':'Đặt PIN'}</button>` : ''}
+      ${canDeleteThis ? `<button class="btn small danger-outline" data-action="delete-staff" data-id="${s.id}">🗑️ Xoá</button>` : ''}
     </div>`;
   }).join('') : `<div class="empty-state"><div class="big">Chưa có cán bộ</div>Thêm danh sách cán bộ để phân công chủ trì, thực hiện chính, phối hợp cho từng công việc.</div>`;
 
-  const firstUnit = UNITS[0];
-  return `
-  <div class="section-title" style="margin-top:0;"><h2>Danh sách cán bộ</h2><span class="hint">Dùng để phân công chủ trì / thực hiện / phối hợp và đăng nhập</span></div>
-  <div class="staff-grid">
+  // Đơn vị được phép chọn khi thêm: lãnh đạo UBND chọn được tất cả; lãnh đạo đơn vị chỉ
+  // chọn được đúng đơn vị mình (không thêm được cho đơn vị khác/cấp trên); danh sách
+  // còn trống (bootstrap) thì cho chọn tất cả để có người đầu tiên đăng nhập.
+  const allowedUnitsForAdd = (!state.staff.length || isUBNDLeadership())
+    ? UNITS
+    : UNITS.filter(u=>u.id === (curUser ? curUser.dept : null));
+  const firstUnit = allowedUnitsForAdd[0] || UNITS[0];
+  const addFormHtml = canManageAny ? `
     <div class="card">
       <h3 style="font-size:14px; margin-bottom:12px;">Thêm cán bộ</h3>
+      ${!isUBNDLeadership() && state.staff.length ? `<p style="font-size:11.5px; color:var(--ink-faint); margin:-4px 0 10px;">Bạn chỉ thêm được cán bộ cho đơn vị của mình. Chỉ Lãnh đạo UBND xã mới thêm được cho các đơn vị khác.</p>` : ''}
       <div class="modal-body" style="padding:0;">
         <div class="field"><label>Họ và tên</label><input type="text" id="staff-name" placeholder="Nguyễn Văn A"></div>
         <div class="field">
           <label>Đơn vị</label>
-          <select id="staff-dept" data-action="staffunit-change">${UNITS.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
+          <select id="staff-dept" data-action="staffunit-change">${allowedUnitsForAdd.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
         </div>
         <div class="field">
           <label>Chức danh</label>
@@ -1091,11 +1143,18 @@ Trần Thị B - Phó Trưởng phòng"></textarea>
       </div>
       <div class="field-row">
         <div class="field"><label>Áp dụng cho đơn vị</label>
-          <select id="staff-bulk-dept">${UNITS.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
+          <select id="staff-bulk-dept">${allowedUnitsForAdd.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
         </div>
         <div style="align-self:end;"><button class="btn gold" data-action="add-staff-bulk">➕ Thêm hàng loạt</button></div>
       </div>
-    </div>
+    </div>` : `
+    <div class="card">
+      <div class="empty-state"><div class="big">🔒 Không có quyền thêm cán bộ</div>${curUser ? 'Chỉ lãnh đạo đơn vị hoặc Lãnh đạo UBND xã mới được thêm/xoá cán bộ. Chuyên viên chỉ xem được danh sách.' : 'Vui lòng đăng nhập. Khách chỉ xem được danh sách.'}</div>
+    </div>`;
+  return `
+  <div class="section-title" style="margin-top:0;"><h2>Danh sách cán bộ</h2><span class="hint">Dùng để phân công chủ trì / thực hiện / phối hợp và đăng nhập</span></div>
+  <div class="staff-grid">
+    ${addFormHtml}
     <div class="card">
       <h3 style="font-size:14px; margin-bottom:12px;">Toàn bộ cán bộ (${state.staff.length})</h3>
       <div class="staff-list">${list}</div>
@@ -1286,8 +1345,7 @@ async function downloadWorkbook(wb, filename){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  logActivity('Xuất Excel', filename);
-  persist();
+  if(isLoggedIn()){ logActivity('Xuất Excel', filename); persist(); } // khách xem không ghi vết lên dữ liệu dùng chung
 }
 /* Tải file .xlsx đơn giản bằng SheetJS — dùng làm phương án dự phòng khi ExcelJS
    (thư viện tạo file có định dạng màu sắc) không tải được hoặc gặp lỗi, để việc
@@ -1298,8 +1356,7 @@ function downloadWithSheetJS(sheets, filename){
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name.slice(0,31));
   });
   XLSX.writeFile(wb, filename);
-  logActivity('Xuất Excel (chế độ đơn giản)', filename);
-  persist();
+  if(isLoggedIn()){ logActivity('Xuất Excel (chế độ đơn giản)', filename); persist(); }
 }
 function deptDetailAOA(d){
   const rows = [['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú']];
@@ -1406,7 +1463,7 @@ async function exportDashboardExcel(){
   const dash = wb.addWorksheet('Dashboard');
   dash.columns = [{width:30},{width:14},{width:14},{width:14},{width:14},{width:34}];
   addTitle(dash, 'UBND XÃ TÂN CHI — TỔNG QUAN THEO DÕI CÔNG VIỆC ('+monthLabel(state.currentMonth)+')', 6);
-  dash.getCell('A2').value = 'Xuất lúc: ' + nowStr() + '  ·  Người xuất: ' + getMyName();
+  dash.getCell('A2').value = 'Xuất lúc: ' + nowStr() + '  ·  Người xuất: ' + (getCurrentUser() ? getCurrentUser().name : 'Khách (chưa đăng nhập)');
   dash.getCell('A2').font = {name:'Arial', size:9, italic:true, color:{argb:'FF57647A'}};
   dash.mergeCells('A2:F2');
 
@@ -1827,8 +1884,10 @@ document.addEventListener('click', async (e)=>{
   if(action==='set-pin'){
     const s = state.staff.find(x=>x.id===el.dataset.id);
     if(!s) return;
-    if(!isSuperAuditor()){
-      alert(`Chỉ ${SUPER_AUDITOR_NAME} (quản trị) mới được đặt/đổi mã PIN cho tài khoản.`);
+    const cur = getCurrentUser();
+    const allowed = isUBNDLeadership() || (cur && cur.id === s.id);
+    if(!allowed){
+      alert('Chỉ Lãnh đạo UBND xã hoặc chính cán bộ đó mới được đặt/đổi mã PIN cho tài khoản này.');
       return;
     }
     const pin = prompt(`Đặt mã PIN mới (4 số) cho ${s.name}. Để trống để bỏ mã PIN.`, '');
@@ -1922,6 +1981,7 @@ document.addEventListener('click', async (e)=>{
     const name = document.getElementById('staff-name').value.trim();
     const chucVu = document.getElementById('staff-chucvu').value.trim();
     const dept = document.getElementById('staff-dept').value;
+    if(!canManageStaffFor(dept)){ alert('Bạn không có quyền thêm cán bộ cho đơn vị này. Chỉ lãnh đạo đúng đơn vị hoặc Lãnh đạo UBND xã mới được thêm.'); return; }
     if(!name){ alert('Vui lòng nhập họ tên.'); return; }
     state.staff.push({id:newId('cb'), name, chucVu, dept});
     logActivity('Thêm cán bộ', `${name} (${deptName(dept)})`);
@@ -1929,8 +1989,9 @@ document.addEventListener('click', async (e)=>{
     return;
   }
   if(action==='add-staff-bulk'){
-    const raw = document.getElementById('staff-bulk').value;
     const dept = document.getElementById('staff-bulk-dept').value;
+    if(!canManageStaffFor(dept)){ alert('Bạn không có quyền thêm cán bộ cho đơn vị này. Chỉ lãnh đạo đúng đơn vị hoặc Lãnh đạo UBND xã mới được thêm.'); return; }
+    const raw = document.getElementById('staff-bulk').value;
     const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
     let count = 0;
     lines.forEach(line=>{
@@ -1942,9 +2003,11 @@ document.addEventListener('click', async (e)=>{
     return;
   }
   if(action==='delete-staff'){
+    const s0 = state.staff.find(x=>x.id===el.dataset.id);
+    if(!s0) return;
+    if(!canManageStaffFor(s0.dept)){ alert('Bạn không có quyền xoá cán bộ của đơn vị này.'); return; }
     if(confirm('Xoá cán bộ này khỏi danh sách?')){
-      const s = state.staff.find(x=>x.id===el.dataset.id);
-      if(s) logActivity('Xoá cán bộ', s.name);
+      logActivity('Xoá cán bộ', s0.name);
       state.staff = state.staff.filter(s=>s.id!==el.dataset.id);
       await persist(); render();
     }
@@ -2009,6 +2072,7 @@ function renderDeptTableOnly(deptId){
   if(f.search){ const q=f.search.toLowerCase(); tasks = tasks.filter(t=>(t.noiDung+' '+t.yeuCau+' '+t.linhVuc).toLowerCase().includes(q)); }
   if(f.linhVuc) tasks = tasks.filter(t=>t.linhVuc===f.linhVuc);
   if(f.status) tasks = tasks.filter(t=>t.status===f.status);
+  tasks = sortByDeadline(tasks);
   const wrap = document.querySelector('#content .table-wrap');
   if(wrap) wrap.outerHTML = renderTaskTable(tasks);
 }
