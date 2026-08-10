@@ -101,6 +101,23 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 .coop-item{display:flex; align-items:center; gap:7px; font-size:12.5px; padding:3px 0; overflow-wrap:break-word; min-width:0;}
 .coop-item input{accent-color:var(--red); width:15px; height:15px;}
 .readonly-note{font-size:11.5px; color:var(--ink-faint); font-style:italic; padding:8px 0;}
+.minhchung-chip{
+  display:flex; align-items:center; gap:7px; padding:6px 9px; margin-bottom:5px;
+  background:var(--surface-2); border:1px solid var(--line-strong); border-radius:7px; font-size:12.5px;
+}
+.minhchung-chip a{color:var(--blue); text-decoration:none; font-weight:600; word-break:break-all;}
+.minhchung-chip a:hover{text-decoration:underline;}
+.mc-icon{flex:none;}
+.mc-size{flex:none; color:var(--ink-faint); font-size:11px;}
+.mc-remove{flex:none; margin-left:auto; background:none; border:none; color:var(--danger); cursor:pointer; font-size:13px; padding:2px 5px; border-radius:4px;}
+.mc-remove:hover{background:var(--danger-soft);}
+.task-mc-link{display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:var(--blue); text-decoration:none; margin-right:8px;}
+.task-mc-link:hover{text-decoration:underline;}
+.col-ketqua{width:200px;}
+.kq-file-row{display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed var(--line);}
+.kq-file-row:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+.kq-file-name{font-size:11.5px; font-weight:600; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-basis:100%;}
+.kq-btn{padding:3px 7px !important; font-size:11px !important;}
 .login-list{display:flex; flex-direction:column; gap:6px; max-height:360px; overflow-y:auto;}
 .login-item{
   display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
@@ -301,6 +318,7 @@ select.status-select{
      ============================================================ -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -317,11 +335,12 @@ const FIREBASE_CONFIG = {
 /* ==================================================================== */
 
 const CONFIG_CHUA_SET = !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.includes("DÁN_API_KEY");
-let db = null, docRef = null;
+let db = null, docRef = null, storageRef = null;
 if(!CONFIG_CHUA_SET){
   firebase.initializeApp(FIREBASE_CONFIG);
   db = firebase.firestore();
   docRef = db.collection('ubnd-tanchi').doc('kpi-data');
+  try{ storageRef = firebase.storage(); }catch(e){ console.error('Không khởi tạo được Firebase Storage (tính năng tải file kết quả sẽ không dùng được):', e); }
 }
 </script>
 
@@ -551,6 +570,7 @@ let uiFilters = {}; // per dept: {search, linhVuc, status}
 let editingTaskId = null;
 let modalMode = null; // 'task' | 'staff' | 'newmonth' | 'login' | null
 let loginTargetId = null; // cán bộ đang nhập mã PIN trong hộp thoại đăng nhập
+let modalMinhChung = []; // {name, url, size, uploadedAt} — file kết quả đang gắn cho công việc trong hộp thoại
 let isApplyingRemote = false;   // tránh vòng lặp khi tự mình vừa ghi xong
 let firestoreReady = false;
 
@@ -1091,6 +1111,16 @@ function renderDeptTab(deptId){
   `;
 }
 
+function renderKetQuaCell(t){
+  if(!t.minhChung || !t.minhChung.length) return '<span style="color:var(--ink-faint)">—</span>';
+  return t.minhChung.map(f=>`
+    <div class="kq-file-row">
+      <span class="mc-icon">📄</span>
+      <span class="kq-file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+      <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="btn small kq-btn" title="Xem trực tiếp">👁️ Xem</a>
+      <a href="${f.url}" download="${escapeHtml(f.name)}" class="btn small kq-btn" title="Tải về máy">⬇️ Tải về</a>
+    </div>`).join('');
+}
 function renderTaskTable(tasks){
   if(!tasks.length){
     return `<div class="table-wrap"><div class="empty-state"><div class="big">Chưa có công việc nào</div>Nhấn "Thêm công việc" để bắt đầu theo dõi.</div></div>`;
@@ -1119,6 +1149,7 @@ function renderTaskTable(tasks){
       <td class="col-people">${escapeHtml(t.thucHien)||'<span style="color:var(--ink-faint)">—</span>'}</td>
       <td class="col-people">${escapeHtml(t.phoiHop)||'<span style="color:var(--ink-faint)">—</span>'}</td>
       <td class="mono" style="text-align:center; width:50px;">${escapeHtml(t.diem)||'—'}</td>
+      <td class="col-ketqua">${renderKetQuaCell(t)}${editable? `<button type="button" class="btn small" data-action="quick-upload-kq" data-id="${t.id}" style="margin-top:4px;">➕ Thêm kết quả</button>`:''}</td>
       <td class="col-actions">
         ${editable ? `
         <button class="btn small" data-action="open-edit-task" data-id="${t.id}">✏️ Sửa</button>
@@ -1139,6 +1170,7 @@ function renderTaskTable(tasks){
         <th class="col-people">TH chính</th>
         <th class="col-people">Phối hợp</th>
         <th style="width:50px;">Điểm</th>
+        <th class="col-ketqua">Kết quả</th>
         <th class="col-actions no-print">​</th>
       </tr></thead>
       <tbody>${rows}</tbody>
@@ -1419,10 +1451,13 @@ function downloadWithSheetJS(sheets, filename){
   XLSX.writeFile(wb, filename);
   if(isLoggedIn()){ logActivity('Xuất Excel (chế độ đơn giản)', filename); persist(); }
 }
+function minhChungText(t){
+  return (t.minhChung && t.minhChung.length) ? t.minhChung.map(f=>f.name+': '+f.url).join('; ') : '';
+}
 function deptDetailAOA(d){
-  const rows = [['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú']];
+  const rows = [['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú','Kết quả']];
   state.tasks.filter(t=>t.dept===d.id).forEach((t,i)=>{
-    rows.push([monthLabel(t.month), i+1, t.linhVuc, t.noiDung, t.yeuCau, t.thoiHan, formatVNDate(t.hanHoanThanh), STATUS_META[t.status]?.label||t.status, t.chuTri, t.thucHien, t.phoiHop, t.diem, t.ghiChu]);
+    rows.push([monthLabel(t.month), i+1, t.linhVuc, t.noiDung, t.yeuCau, t.thoiHan, formatVNDate(t.hanHoanThanh), STATUS_META[t.status]?.label||t.status, t.chuTri, t.thucHien, t.phoiHop, t.diem, t.ghiChu, minhChungText(t)]);
   });
   return rows;
 }
@@ -1598,8 +1633,8 @@ async function exportDashboardExcel(){
 
 function addDeptDetailSheet(wb, d){
   const ws = wb.addWorksheet(d.short.slice(0,31));
-  ws.columns = [{width:12},{width:5},{width:20},{width:34},{width:34},{width:16},{width:14},{width:16},{width:14},{width:16},{width:16},{width:9},{width:26}];
-  const headers = ['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú'];
+  ws.columns = [{width:12},{width:5},{width:20},{width:34},{width:34},{width:16},{width:14},{width:16},{width:14},{width:16},{width:16},{width:9},{width:26},{width:34}];
+  const headers = ['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú','Kết quả'];
   addTitle(ws, d.name.toUpperCase(), headers.length);
   const headRow = ws.getRow(3);
   headers.forEach((h,i)=>headRow.getCell(i+1).value=h);
@@ -1611,7 +1646,7 @@ function addDeptDetailSheet(wb, d){
     row.getCell(4).value = t.noiDung; row.getCell(5).value = t.yeuCau; row.getCell(6).value = t.thoiHan;
     row.getCell(7).value = formatVNDate(t.hanHoanThanh); row.getCell(8).value = STATUS_META[t.status]?.label||t.status;
     row.getCell(9).value = t.chuTri; row.getCell(10).value = t.thucHien; row.getCell(11).value = t.phoiHop;
-    row.getCell(12).value = t.diem; row.getCell(13).value = t.ghiChu;
+    row.getCell(12).value = t.diem; row.getCell(13).value = t.ghiChu; row.getCell(14).value = minhChungText(t);
     row.eachCell(c=>c.alignment={wrapText:true, vertical:'top'});
     r++;
   });
@@ -1787,6 +1822,92 @@ function renderLoginModal(){
   </div>`;
 }
 
+/* ---------------- MINH CHỨNG HOÀN THÀNH (tải file lên Firebase Storage) ---------------- */
+function formatFileSize(bytes){
+  if(!bytes) return '';
+  if(bytes < 1024*1024) return Math.round(bytes/1024)+' KB';
+  return (bytes/1024/1024).toFixed(1)+' MB';
+}
+function renderMinhChungList(){
+  if(!modalMinhChung.length) return '<p style="font-size:12px; color:var(--ink-faint); margin:4px 0;">Chưa có kết quả nào.</p>';
+  return modalMinhChung.map((f,i)=>`
+    <div class="minhchung-chip">
+      <span class="mc-icon">📄</span>
+      <a href="${f.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(f.name)}</a>
+      <span class="mc-size">${formatFileSize(f.size)}</span>
+      <button type="button" class="mc-remove" data-action="remove-minhchung" data-index="${i}" title="Gỡ file này">✕</button>
+    </div>`).join('');
+}
+async function handleMinhChungFileSelected(file){
+  if(!storageRef){
+    alert('Chưa dùng được tính năng tải file: Firebase Storage chưa được bật hoặc chưa nâng cấp gói Blaze. Xem hướng dẫn triển khai để bật.');
+    return;
+  }
+  if(file.size > 15*1024*1024){
+    alert('File "'+file.name+'" nặng quá 15MB. Vui lòng chọn file nhỏ hơn hoặc nén lại.');
+    return;
+  }
+  const listEl = document.getElementById('minhchung-list');
+  if(listEl) listEl.insertAdjacentHTML('beforeend', '<p id="mc-uploading" style="font-size:12px; color:var(--gold);">⏳ Đang tải "'+escapeHtml(file.name)+'" lên…</p>');
+  try{
+    const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+    const path = 'ket-qua/' + Date.now() + '_' + safeName;
+    const ref = storageRef.ref().child(path);
+    const snap = await ref.put(file);
+    const url = await snap.ref.getDownloadURL();
+    modalMinhChung.push({name:file.name, url, size:file.size, uploadedAt: nowStr(), uploadedBy: getMyName()});
+  }catch(e){
+    console.error('Lỗi tải file kết quả:', e);
+    alert('Không tải được file lên. Kiểm tra kết nối mạng, hoặc Firebase Storage/Quy tắc bảo mật chưa thiết lập đúng hướng dẫn.');
+  }finally{
+    const up = document.getElementById('mc-uploading');
+    if(up) up.remove();
+    const listEl2 = document.getElementById('minhchung-list');
+    if(listEl2) listEl2.innerHTML = renderMinhChungList();
+  }
+}
+/* Tải nhanh 1 file kết quả trực tiếp cho 1 công việc, KHÔNG cần mở hộp thoại sửa —
+   dùng cho nút "+ Thêm kết quả" trên bảng và khi đổi trạng thái sang "Hoàn thành". */
+function quickUploadForTask(taskId){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,application/pdf,.doc,.docx,.xls,.xlsx';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.addEventListener('change', async ()=>{
+    const file = input.files && input.files[0];
+    if(input.parentNode) input.parentNode.removeChild(input);
+    if(!file) return; // người dùng bấm Cancel — không tải gì cả, không sao
+    if(!storageRef){
+      alert('Chưa dùng được tính năng tải file: Firebase Storage chưa được bật hoặc chưa nâng cấp gói Blaze.');
+      return;
+    }
+    if(file.size > 15*1024*1024){
+      alert('File "'+file.name+'" nặng quá 15MB. Vui lòng chọn file nhỏ hơn hoặc nén lại.');
+      return;
+    }
+    try{
+      const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+      const path = 'ket-qua/' + Date.now() + '_' + safeName;
+      const ref = storageRef.ref().child(path);
+      const snap = await ref.put(file);
+      const url = await snap.ref.getDownloadURL();
+      const t = state.tasks.find(x=>x.id===taskId);
+      if(t){
+        if(!t.minhChung) t.minhChung = [];
+        t.minhChung.push({name:file.name, url, size:file.size, uploadedAt: nowStr(), uploadedBy: getMyName()});
+        t.lastEditedBy = getMyName(); t.lastEditedAt = nowStr();
+        logActivity('Thêm kết quả', `[${deptName(t.dept)}] ${t.noiDung}: ${file.name}`);
+        await persist(); render();
+      }
+    }catch(e){
+      console.error('Lỗi tải file kết quả:', e);
+      alert('Không tải được file lên. Kiểm tra kết nối mạng, hoặc Firebase Storage/Quy tắc bảo mật chưa thiết lập đúng hướng dẫn.');
+    }
+  });
+  input.click();
+}
+
 function renderTaskModal(){
   const editing = editingTaskId ? state.tasks.find(t=>t.id===editingTaskId) : null;
   const uCur = getCurrentUser();
@@ -1829,7 +1950,7 @@ function renderTaskModal(){
         <div class="field"><label>Ngày hoàn thành dự kiến</label><input type="date" id="f-handoan" value="${escapeHtml(t.hanHoanThanh||'')}"></div>
       </div>
       <div class="field"><label>Trạng thái</label>
-        <select id="f-status">${Object.entries(STATUS_META).map(([k,v])=>`<option value="${k}" ${t.status===k?'selected':''}>${v.label}</option>`).join('')}</select>
+        <select id="f-status" data-action="status-select-in-modal">${Object.entries(STATUS_META).map(([k,v])=>`<option value="${k}" ${t.status===k?'selected':''}>${v.label}</option>`).join('')}</select>
       </div>
       <div class="field-row">
         <div class="field"><label>Cán bộ chủ trì</label>
@@ -1848,6 +1969,12 @@ function renderTaskModal(){
       <div class="field-row">
         <div class="field"><label>Điểm đánh giá</label><input type="text" id="f-diem" value="${escapeHtml(t.diem)}" placeholder="VD: 9.5"></div>
         <div class="field"><label>Ghi chú / đôn đốc</label><input type="text" id="f-ghichu" value="${escapeHtml(t.ghiChu)}"></div>
+      </div>
+      <div class="field">
+        <label>📎 Kết quả hoàn thành (ảnh, PDF, Word... tối đa 15MB/file)</label>
+        <div id="minhchung-list">${renderMinhChungList()}</div>
+        <input type="file" id="f-minhchung-input" data-action="minhchung-file-selected" style="display:none" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx">
+        <button type="button" class="btn small" data-action="pick-minhchung" style="justify-self:start; margin-top:4px;">➕ Chọn file để tải lên</button>
       </div>
     </div>
     <div class="modal-foot">
@@ -1901,11 +2028,32 @@ document.addEventListener('click', async (e)=>{
   const action = el.dataset.action;
 
   if(action==='set-tab'){ uiTab = el.dataset.tab; render(); return; }
-  if(action==='open-add-task'){ editingTaskId=null; modalDeptDefault = el.dataset.dept; modalMode='task'; render(); return; }
-  if(action==='open-edit-task'){ editingTaskId = el.dataset.id; modalMode='task'; render(); return; }
+  if(action==='open-add-task'){ editingTaskId=null; modalDeptDefault = el.dataset.dept; modalMinhChung=[]; modalMode='task'; render(); return; }
+  if(action==='open-edit-task'){
+    editingTaskId = el.dataset.id;
+    const t0 = state.tasks.find(x=>x.id===editingTaskId);
+    modalMinhChung = (t0 && t0.minhChung) ? t0.minhChung.slice() : [];
+    modalMode='task'; render(); return;
+  }
   if(action==='close-modal' || action==='close-modal-overlay'){
     if(action==='close-modal-overlay' && e.target !== el) return;
     modalMode=null; editingTaskId=null; loginTargetId=null; render(); return;
+  }
+  if(action==='pick-minhchung'){
+    const inp = document.getElementById('f-minhchung-input');
+    if(inp) inp.click();
+    return;
+  }
+  if(action==='quick-upload-kq'){
+    quickUploadForTask(el.dataset.id);
+    return;
+  }
+  if(action==='remove-minhchung'){
+    const idx = parseInt(el.dataset.index, 10);
+    if(!isNaN(idx)) modalMinhChung.splice(idx, 1);
+    const listEl = document.getElementById('minhchung-list');
+    if(listEl) listEl.innerHTML = renderMinhChungList();
+    return;
   }
   if(action==='open-newmonth'){ modalMode='newmonth'; render(); return; }
   if(action==='open-login'){ modalMode='login'; loginTargetId=null; render(); return; }
@@ -1993,7 +2141,8 @@ document.addEventListener('click', async (e)=>{
       thucHien: document.getElementById('f-thuchien').value,
       phoiHop: coopChecked.join(', '),
       diem: document.getElementById('f-diem').value.trim(),
-      ghiChu: document.getElementById('f-ghichu').value.trim()
+      ghiChu: document.getElementById('f-ghichu').value.trim(),
+      minhChung: modalMinhChung.slice()
     };
     if(!data.noiDung){ alert('Vui lòng nhập nội dung công việc.'); return; }
     const id = el.dataset.id;
@@ -2086,6 +2235,12 @@ document.addEventListener('change', async (e)=>{
   const action = el.dataset.action;
 
   if(action==='set-month'){ state.currentMonth = el.value; render(); return; }
+  if(action==='minhchung-file-selected'){
+    const file = el.files && el.files[0];
+    if(file) handleMinhChungFileSelected(file);
+    el.value = ''; // cho phép chọn lại cùng 1 file lần sau nếu cần
+    return;
+  }
   if(action==='modal-dept-change'){
     const dept = el.value;
     const deptStaff = state.staff.filter(s=>s.dept===dept).slice().sort((a,b)=>{const r=roleRank(a)-roleRank(b); return r!==0?r:(a.name||'').localeCompare(b.name||'','vi');});
@@ -2104,15 +2259,26 @@ document.addEventListener('change', async (e)=>{
     if(sel) sel.innerHTML = roleOptionsFor(el.value).map(r=>`<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
     return;
   }
+  if(action==='status-select-in-modal'){
+    if(el.value === 'done'){
+      const inp = document.getElementById('f-minhchung-input');
+      if(inp) inp.click();
+    }
+    return;
+  }
   if(action==='update-status'){
     const t = state.tasks.find(x=>x.id===el.dataset.id);
     if(t && !canEditDept(t.dept)){ alert('Bạn không có quyền sửa công việc của đơn vị này.'); render(); return; }
     if(t){
       const oldStatus = STATUS_META[t.status]?.label || t.status;
-      t.status = el.value;
+      const newStatus = el.value;
+      t.status = newStatus;
       t.lastEditedBy = getMyName(); t.lastEditedAt = nowStr();
-      logActivity('Đổi trạng thái', `[${deptName(t.dept)}] ${t.noiDung}: ${oldStatus} → ${STATUS_META[el.value].label}`);
+      logActivity('Đổi trạng thái', `[${deptName(t.dept)}] ${t.noiDung}: ${oldStatus} → ${STATUS_META[newStatus].label}`);
       await persist(); render();
+      if(newStatus === 'done'){
+        quickUploadForTask(t.id); // mở ngay hộp thoại chọn file kết quả — có thể bấm Cancel để bỏ qua
+      }
     }
     return;
   }
