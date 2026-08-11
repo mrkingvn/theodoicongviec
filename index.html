@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UBND xã Tân Chi · Theo dõi &amp; đôn đốc công việc</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root{
   --bg:#E9EDF2;
@@ -46,7 +46,7 @@ body{
   min-height:100vh;
 }
 .mono{font-family:'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;}
-h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:.1px;}
+h1,h2,h3{font-family:'Be Vietnam Pro', -apple-system, "Segoe UI", sans-serif; margin:0; letter-spacing:.1px;}
 
 /* ---------- layout shell ---------- */
 #app{max-width:1360px; margin:0 auto; padding:20px 20px 60px;}
@@ -63,7 +63,7 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
   background:radial-gradient(circle at 34% 30%, #C1495B, var(--red) 55%, var(--red-dark) 100%);
   border:2px solid rgba(255,255,255,.35);
   display:flex;align-items:center;justify-content:center;
-  color:#fff; font-family:'Source Serif 4',serif; font-weight:700; font-size:11px;
+  color:#fff; font-family:'Be Vietnam Pro',sans-serif; font-weight:800; font-size:11px;
   transform:rotate(-8deg);
   box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08);
   flex:none;
@@ -113,11 +113,33 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 .mc-remove:hover{background:var(--danger-soft);}
 .task-mc-link{display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:var(--blue); text-decoration:none; margin-right:8px;}
 .task-mc-link:hover{text-decoration:underline;}
-.col-ketqua{width:200px;}
-.kq-file-row{display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed var(--line);}
-.kq-file-row:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
-.kq-file-name{font-size:11.5px; font-weight:600; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-basis:100%;}
-.kq-btn{padding:3px 7px !important; font-size:11px !important;}
+.col-ketqua{width:120px;}
+.kq-file-group{display:flex; flex-wrap:wrap; gap:5px;}
+.kq-file-chip{
+  display:inline-flex; align-items:center; gap:3px; padding:3px 5px; background:var(--surface-2);
+  border:1px solid var(--line); border-radius:6px;
+}
+.kq-file-num{font-size:10.5px; font-weight:700; color:var(--ink-soft); padding-right:2px;}
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; flex:none;
+  border:1px solid var(--line-strong); background:var(--surface); border-radius:5px; font-size:12px;
+  text-decoration:none; color:var(--ink); cursor:pointer; transition:all .12s ease;
+}
+.icon-btn:hover{border-color:var(--red); background:var(--red-soft); transform:translateY(-1px);}
+.icon-btn-danger:hover{border-color:var(--danger); background:var(--danger-soft);}
+.icon-btn-add{border-style:dashed; color:var(--gold); border-color:var(--gold); margin-top:4px;}
+.icon-btn-add:hover{background:var(--gold-soft);}
+.col-actions{width:64px; white-space:nowrap;}
+.biettuot-box{
+  background:linear-gradient(135deg, var(--gold-soft), var(--surface-2));
+  border:1px solid var(--gold); border-radius:10px; padding:14px 16px; margin-bottom:10px;
+}
+.biettuot-box p{margin:0 0 8px; font-size:13px; line-height:1.6; color:var(--ink);}
+.biettuot-box p:last-child{margin-bottom:0;}
+.biettuot-suggestion{
+  background:var(--green-soft); border:1px solid var(--green); border-radius:8px; padding:10px 12px;
+  font-size:12.5px; font-weight:600; color:var(--green); margin-bottom:8px;
+}
 .login-list{display:flex; flex-direction:column; gap:6px; max-height:360px; overflow-y:auto;}
 .login-item{
   display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px;
@@ -151,7 +173,7 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 .kpi{transition:transform .15s ease, box-shadow .15s ease;}
 .kpi:hover{transform:translateY(-2px); box-shadow:0 4px 16px -4px rgba(20,27,44,.2);}
 .kpi .label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-faint); font-weight:700;}
-.kpi .value{font-family:'Source Serif 4',serif; font-size:32px; font-weight:600; margin-top:4px;}
+.kpi .value{font-family:'Be Vietnam Pro',sans-serif; font-size:32px; font-weight:800; margin-top:4px;}
 .kpi .sub{font-size:12px; color:var(--ink-soft); margin-top:4px;}
 .kpi.red .value{color:var(--red-dark);}
 .kpi.green .value{color:var(--green);}
@@ -164,7 +186,13 @@ h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; margin:0; letter-spacing:
 /* dept progress bars */
 .dept-bar-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px dashed var(--line);}
 .dept-bar-row:last-child{border-bottom:none;}
-.dept-bar-name{width:190px; flex:none; font-weight:600; font-size:13px;}
+.dept-bar-name{width:190px; flex:none; font-weight:600; font-size:13px; display:flex; align-items:center; gap:8px;}
+.dept-dot{width:9px; height:9px; border-radius:50%; flex:none;}
+.dept-dot-0{background:var(--red);} .dept-fill-0{background:linear-gradient(90deg, #C1495B, var(--red));}
+.dept-dot-1{background:var(--blue);} .dept-fill-1{background:linear-gradient(90deg, #5C8DC4, var(--blue));}
+.dept-dot-2{background:var(--gold);} .dept-fill-2{background:linear-gradient(90deg, #D4B36A, var(--gold));}
+.dept-dot-3{background:var(--green);} .dept-fill-3{background:linear-gradient(90deg, #5AAE8A, var(--green));}
+.dept-dot-4{background:#8B5FBF;} .dept-fill-4{background:linear-gradient(90deg, #B79AE0, #8B5FBF);}
 .dept-bar-track{flex:1; height:10px; background:var(--surface-2); border-radius:6px; overflow:hidden; border:1px solid var(--line);}
 .dept-bar-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--red));}
 .dept-bar-pct{width:110px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-soft); flex:none;}
@@ -207,7 +235,7 @@ tbody tr.overdue:hover{background:#f4cfc9;}
 .col-linhvuc{width:150px; font-weight:600; color:var(--red-dark);}
 .col-deadline{width:150px; font-family:'JetBrains Mono',monospace; font-size:12px; white-space:normal;}
 .col-people{width:120px; font-size:12.5px;}
-.col-actions{width:78px; white-space:nowrap;}
+.col-actions{width:64px; white-space:nowrap;} /* (hợp nhất, đã gọn hơn) */
 .task-name{font-weight:600; margin-bottom:2px;}
 .task-req{color:var(--ink-soft); font-size:12.5px;}
 .note{font-size:12px; color:var(--gold); margin-top:4px;}
@@ -277,13 +305,18 @@ select.status-select{
 .pill-dept{display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; background:var(--gold-soft); color:var(--gold);}
 
 /* urging list */
-.urge-item{display:flex; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line); align-items:flex-start; flex-wrap:wrap;}
+.urge-item{display:flex; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line); align-items:flex-start; flex-wrap:wrap; cursor:pointer; transition:background .12s ease;}
+.urge-item:hover{background:var(--surface-2);}
 .urge-item:last-child{border-bottom:none;}
 .urge-dept{flex:none; width:118px; max-width:100%;}
 .urge-body{flex:1; min-width:160px;}
 .urge-title{font-weight:600; font-size:13.5px; overflow-wrap:break-word;}
 .urge-sub{font-size:12px; color:var(--ink-soft); margin-top:2px; overflow-wrap:break-word;}
 .urge-deadline{flex:none; text-align:right; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--danger); font-weight:700;}
+.urge-deadline.soon{color:var(--amber);}
+.urge-card{padding:4px 0; max-height:420px; overflow-y:auto;}
+.urge-card-red{border-top:3px solid var(--danger);}
+.urge-card-amber{border-top:3px solid var(--amber);}
 @media(max-width:520px){
   .urge-item{flex-direction:column; gap:4px;}
   .urge-dept, .urge-deadline{width:auto; text-align:left;}
@@ -570,6 +603,8 @@ let uiFilters = {}; // per dept: {search, linhVuc, status}
 let editingTaskId = null;
 let modalMode = null; // 'task' | 'staff' | 'newmonth' | 'login' | null
 let loginTargetId = null; // cán bộ đang nhập mã PIN trong hộp thoại đăng nhập
+let bietTuotTaskId = null; // công việc đang xem tóm tắt "Biết Tuốt"
+let importedRows = []; // các dòng công việc đã đọc được từ file Excel, chờ xác nhận nhập
 let modalMinhChung = []; // {name, url, size, uploadedAt} — file kết quả đang gắn cho công việc trong hộp thoại
 let isApplyingRemote = false;   // tránh vòng lặp khi tự mình vừa ghi xong
 let firestoreReady = false;
@@ -998,22 +1033,32 @@ function renderActivityLog(){
 function renderOverview(){
   const tasks = tasksForMonth(state.currentMonth);
   const s = statsFor(tasks);
-  const urgent = tasks
-    .filter(t=>t.status!=='done')
-    .map(t=>({t, d:daysUntil(t)}))
-    .filter(x=> x.d!==null && x.d<=3)
-    .sort((a,b)=> a.d-b.d)
-    .slice(0,12);
+  const notDone = tasks.filter(t=>t.status!=='done').map(t=>({t, d:daysUntil(t)})).filter(x=>x.d!==null);
+  const overdueList = notDone.filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,15);
+  const dueSoonList = notDone.filter(x=>x.d>=0 && x.d<=3).sort((a,b)=>a.d-b.d).slice(0,15);
 
-  const deptRows = DEPARTMENTS.map(d=>{
+  const deptRows = DEPARTMENTS.map((d,i)=>{
     const dt = tasks.filter(t=>t.dept===d.id);
     const st = statsFor(dt);
     return `<div class="dept-bar-row">
-      <div class="dept-bar-name">${d.short}</div>
-      <div class="dept-bar-track"><div class="dept-bar-fill" style="width:${st.pct}%"></div></div>
+      <div class="dept-bar-name"><span class="dept-dot dept-dot-${i%5}"></span>${d.short}</div>
+      <div class="dept-bar-track"><div class="dept-bar-fill dept-fill-${i%5}" style="width:${st.pct}%"></div></div>
       <div class="dept-bar-pct">${st.done}/${st.total} việc · ${st.pct}%</div>
     </div>`;
   }).join('');
+
+  function urgeList(list, emptyText){
+    if(!list.length) return `<div class="empty-state" style="padding:26px 20px;"><div class="big">🎉 ${emptyText}</div></div>`;
+    return list.map(x=>`
+      <div class="urge-item" data-action="ask-biettuot" data-id="${x.t.id}" title="Bấm để xem Biết Tuốt tóm tắt việc này">
+        <div class="urge-dept"><span class="pill-dept">${deptName(x.t.dept)}</span></div>
+        <div class="urge-body">
+          <div class="urge-title">${escapeHtml(x.t.noiDung)}</div>
+          <div class="urge-sub">${escapeHtml(x.t.linhVuc)}${x.t.chuTri? ' · Chủ trì: '+escapeHtml(x.t.chuTri):''}</div>
+        </div>
+        <div class="urge-deadline ${x.d<0?'':'soon'}">${x.d<0? Math.abs(x.d)+' ngày quá hạn' : (x.d===0? 'Đến hạn hôm nay' : 'Còn '+x.d+' ngày')}</div>
+      </div>`).join('');
+  }
 
   return `
   <div class="grid grid-4">
@@ -1032,18 +1077,18 @@ function renderOverview(){
   </div>
   <style>@media(max-width:820px){.grid[style*="1.3fr"]{grid-template-columns:1fr !important;}}</style>
 
-  <div class="section-title"><h2>Cần đôn đốc gấp</h2><span class="hint">Quá hạn hoặc còn ≤ 3 ngày</span></div>
-  <div class="card" style="padding:6px 0;">
-    ${urgent.length ? urgent.map(x=>`
-      <div class="urge-item">
-        <div class="urge-dept"><span class="pill-dept">${deptName(x.t.dept)}</span></div>
-        <div class="urge-body">
-          <div class="urge-title">${escapeHtml(x.t.noiDung)}</div>
-          <div class="urge-sub">${escapeHtml(x.t.linhVuc)}${x.t.chuTri? ' · Chủ trì: '+escapeHtml(x.t.chuTri):''}</div>
-        </div>
-        <div class="urge-deadline">${x.d<0? Math.abs(x.d)+' ngày quá hạn' : (x.d===0? 'Đến hạn hôm nay' : 'Còn '+x.d+' ngày')}</div>
-      </div>`).join('') : `<div class="empty-state"><div class="big">Không có việc gấp</div>Hiện chưa có công việc nào quá hạn hoặc sắp đến hạn trong 3 ngày tới.</div>`}
+  <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;">
+    <div>
+      <div class="section-title"><h2>🔴 Đã quá hạn</h2><span class="hint">${overdueList.length} việc</span></div>
+      <div class="card urge-card urge-card-red">${urgeList(overdueList, 'Không có việc nào quá hạn')}</div>
+    </div>
+    <div>
+      <div class="section-title"><h2>🟡 Sắp đến hạn</h2><span class="hint">Trong 3 ngày tới</span></div>
+      <div class="card urge-card urge-card-amber">${urgeList(dueSoonList, 'Không có việc nào sắp đến hạn')}</div>
+    </div>
   </div>
+  <style>@media(max-width:900px){.grid[style*="1fr 1fr"]{grid-template-columns:1fr !important;}}</style>
+  <p class="note" style="margin-top:6px; color:var(--ink-faint);">💡 Bấm vào một công việc trong danh sách trên để hỏi <strong style="color:var(--gold);">🧞 Biết Tuốt</strong> — trợ lý tóm tắt nhanh tình hình việc đó.</p>
 
   ${renderQuickLinks()}
   `;
@@ -1105,7 +1150,7 @@ function renderDeptTab(deptId){
       ${Object.entries(STATUS_META).map(([k,v])=>`<option value="${k}" ${f.status===k?'selected':''}>${v.label}</option>`).join('')}
     </select>
     <div class="spacer"></div>
-    ${canEditDept(deptId) ? `<button class="btn gold" data-action="open-add-task" data-dept="${deptId}">➕ Thêm công việc</button>` : ''}
+    ${canEditDept(deptId) ? `<button class="btn" data-action="open-import-excel" data-dept="${deptId}">📥 Nhập từ Excel</button><button class="btn gold" data-action="open-add-task" data-dept="${deptId}">➕ Thêm công việc</button>` : ''}
   </div>
   ${renderTaskTable(tasks)}
   `;
@@ -1113,18 +1158,18 @@ function renderDeptTab(deptId){
 
 function renderKetQuaCell(t){
   if(!t.minhChung || !t.minhChung.length) return '<span style="color:var(--ink-faint)">—</span>';
-  return t.minhChung.map(f=>`
-    <div class="kq-file-row">
-      <span class="mc-icon">📄</span>
-      <span class="kq-file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
-      <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="btn small kq-btn" title="Xem trực tiếp">👁️ Xem</a>
-      <a href="${f.url}" download="${escapeHtml(f.name)}" class="btn small kq-btn" title="Tải về máy">⬇️ Tải về</a>
-    </div>`).join('');
+  return `<div class="kq-file-group">` + t.minhChung.map((f,i)=>`
+      <span class="kq-file-chip" title="${escapeHtml(f.name)}">
+        <span class="kq-file-num">Tệp ${i+1}</span>
+        <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="icon-btn" title="Xem: ${escapeHtml(f.name)}">👁️</a>
+        <a href="${f.url}" download="${escapeHtml(f.name)}" class="icon-btn" title="Tải về: ${escapeHtml(f.name)}">⬇️</a>
+      </span>`).join('') + `</div>`;
 }
 function renderTaskTable(tasks){
   if(!tasks.length){
     return `<div class="table-wrap"><div class="empty-state"><div class="big">Chưa có công việc nào</div>Nhấn "Thêm công việc" để bắt đầu theo dõi.</div></div>`;
   }
+  const showLastEdited = isUBNDLeadership();
   const rows = tasks.map((t,i)=>{
     const overdue = isOverdue(t);
     const editable = canEditDept(t.dept);
@@ -1136,7 +1181,7 @@ function renderTaskTable(tasks){
         <div class="task-name">${escapeHtml(t.noiDung)}</div>
         ${t.yeuCau? `<div class="task-req">${escapeHtml(t.yeuCau)}</div>` : ''}
         ${t.ghiChu? `<div class="note">Ghi chú: ${escapeHtml(t.ghiChu)}</div>` : ''}
-        ${t.lastEditedBy? `<div class="note" style="color:var(--ink-faint);">Cập nhật lần cuối: ${escapeHtml(t.lastEditedBy)} · ${escapeHtml(t.lastEditedAt||'')}</div>` : ''}
+        ${(showLastEdited && t.lastEditedBy)? `<div class="note" style="color:var(--ink-faint);">Cập nhật lần cuối: ${escapeHtml(t.lastEditedBy)} · ${escapeHtml(t.lastEditedAt||'')}</div>` : ''}
       </td>
       <td class="col-deadline">${escapeHtml(t.thoiHan)||'—'}${t.hanHoanThanh?`<div class="mono" style="margin-top:4px; color:var(--ink-soft); font-size:11.5px;">📅 ${formatVNDate(t.hanHoanThanh)}</div>`:''}${overdue?'<span class="badge overdue-flag">Quá hạn</span>':''}</td>
       <td>
@@ -1148,12 +1193,12 @@ function renderTaskTable(tasks){
       <td class="col-people">${escapeHtml(t.chuTri)||'<span style="color:var(--ink-faint)">—</span>'}</td>
       <td class="col-people">${escapeHtml(t.thucHien)||'<span style="color:var(--ink-faint)">—</span>'}</td>
       <td class="col-people">${escapeHtml(t.phoiHop)||'<span style="color:var(--ink-faint)">—</span>'}</td>
-      <td class="mono" style="text-align:center; width:50px;">${escapeHtml(t.diem)||'—'}</td>
-      <td class="col-ketqua">${renderKetQuaCell(t)}${editable? `<button type="button" class="btn small" data-action="quick-upload-kq" data-id="${t.id}" style="margin-top:4px;">➕ Thêm kết quả</button>`:''}</td>
+      <td class="mono" style="text-align:center; width:44px;">${escapeHtml(t.diem)||'—'}</td>
+      <td class="col-ketqua">${renderKetQuaCell(t)}${editable? `<button type="button" class="icon-btn icon-btn-add" data-action="quick-upload-kq" data-id="${t.id}" title="Thêm kết quả">➕</button>`:''}</td>
       <td class="col-actions">
         ${editable ? `
-        <button class="btn small" data-action="open-edit-task" data-id="${t.id}">✏️ Sửa</button>
-        <button class="btn small danger-outline" data-action="delete-task" data-id="${t.id}">🗑️ Xoá</button>` : `<span class="readonly-note">Chỉ xem</span>`}
+        <button class="icon-btn" data-action="open-edit-task" data-id="${t.id}" title="Sửa">✏️</button>
+        <button class="icon-btn icon-btn-danger" data-action="delete-task" data-id="${t.id}" title="Xoá">🗑️</button>` : `<span class="readonly-note">Chỉ xem</span>`}
       </td>
     </tr>`;
   }).join('');
@@ -1169,7 +1214,7 @@ function renderTaskTable(tasks){
         <th class="col-people">Chủ trì</th>
         <th class="col-people">TH chính</th>
         <th class="col-people">Phối hợp</th>
-        <th style="width:50px;">Điểm</th>
+        <th style="width:44px;">Điểm</th>
         <th class="col-ketqua">Kết quả</th>
         <th class="col-actions no-print">​</th>
       </tr></thead>
@@ -1542,6 +1587,52 @@ function barCell(pct){
   const n = Math.round(Math.max(0,Math.min(100,pct))/10);
   return '█'.repeat(n) + '░'.repeat(10-n) + '  ' + pct + '%';
 }
+/* Lãnh đạo phụ trách 1 đơn vị — dùng để ghi vào phần đầu báo cáo Excel cho đúng thể thức. */
+function deptLeaderName(deptId){
+  const leaders = state.staff.filter(s=>s.dept===deptId && s.chucVu && s.chucVu!=='Chuyên viên')
+    .slice().sort((a,b)=>roleRank(a)-roleRank(b));
+  return leaders.length ? leaders.map(s=>s.name+' ('+s.chucVu+')').join(', ') : '(chưa cập nhật)';
+}
+/* Vẽ 1 biểu đồ Chart.js ra canvas ẩn rồi xuất thành ảnh PNG (base64) để nhúng vào Excel —
+   vì thư viện tạo file Excel (ExcelJS) không hỗ trợ tạo biểu đồ Excel "sống" trực tiếp,
+   nên dùng ảnh biểu đồ để bảng tính vẫn trực quan, xem được ngay không cần mở lại phần mềm. */
+function chartToImageBase64(config, width, height){
+  return new Promise((resolve)=>{
+    if(typeof Chart === 'undefined'){ resolve(null); return; }
+    try{
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const chart = new Chart(canvas, { ...config, options: { ...(config.options||{}), responsive:false, animation:false } });
+      setTimeout(()=>{
+        try{
+          const dataUrl = canvas.toDataURL('image/png');
+          chart.destroy();
+          resolve(dataUrl.split(',')[1]);
+        }catch(e){ console.error('Lỗi xuất ảnh biểu đồ:', e); resolve(null); }
+      }, 60);
+    }catch(e){ console.error('Lỗi vẽ biểu đồ cho Excel:', e); resolve(null); }
+  });
+}
+async function buildDashboardCharts(monthTasks){
+  const barImg = await chartToImageBase64({
+    type:'bar',
+    data:{ labels: DEPARTMENTS.map(d=>d.short), datasets:[
+      {label:'Tổng số', data: DEPARTMENTS.map(d=>statsFor(monthTasks.filter(t=>t.dept===d.id)).total), backgroundColor:'#D9DFE7', borderRadius:3},
+      {label:'Hoàn thành', data: DEPARTMENTS.map(d=>statsFor(monthTasks.filter(t=>t.dept===d.id)).done), backgroundColor:'#2C7A5B', borderRadius:3},
+      {label:'Quá hạn', data: DEPARTMENTS.map(d=>statsFor(monthTasks.filter(t=>t.dept===d.id)).overdue), backgroundColor:'#B3352B', borderRadius:3}
+    ]},
+    options:{ plugins:{ title:{display:true, text:'Khối lượng công việc theo phòng, ban', font:{size:15}}, legend:{position:'bottom'} }, scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
+  }, 640, 340);
+  const pieImg = await chartToImageBase64({
+    type:'doughnut',
+    data:{ labels: Object.values(STATUS_META).map(v=>v.label), datasets:[{
+      data: Object.keys(STATUS_META).map(k=>monthTasks.filter(t=>t.status===k).length),
+      backgroundColor:['#8B96A8','#2E5C8A','#2C7A5B','#B97B1F']
+    }]},
+    options:{ plugins:{ title:{display:true, text:'Phân bổ trạng thái công việc', font:{size:15}}, legend:{position:'bottom'} } }
+  }, 460, 340);
+  return { barImg, pieImg };
+}
 
 function buildDeptSheet(wb, title, ncols=6){
   const ws = wb.addWorksheet(title);
@@ -1554,32 +1645,37 @@ async function exportDashboardExcel(){
   const wb = new ExcelJS.Workbook();
   wb.creator = 'UBND xã Tân Chi'; wb.created = new Date();
   const monthTasks = tasksForMonth(state.currentMonth);
+  const nguoiLap = getCurrentUser() ? getCurrentUser().name + ' (' + getCurrentUser().chucVu + ')' : 'Khách (chưa đăng nhập)';
+  const lanhDaoUBND = deptLeaderName('ubnd');
 
   // ---- Sheet Dashboard ----
   const dash = wb.addWorksheet('Dashboard');
   dash.columns = [{width:30},{width:14},{width:14},{width:14},{width:14},{width:34}];
-  addTitle(dash, 'UBND XÃ TÂN CHI — TỔNG QUAN THEO DÕI CÔNG VIỆC ('+monthLabel(state.currentMonth)+')', 6);
-  dash.getCell('A2').value = 'Xuất lúc: ' + nowStr() + '  ·  Người xuất: ' + (getCurrentUser() ? getCurrentUser().name : 'Khách (chưa đăng nhập)');
+  addTitle(dash, 'BÁO CÁO TỔNG QUAN THEO DÕI, ĐÔN ĐỐC CÔNG VIỆC — UBND XÃ TÂN CHI', 6);
+  dash.getCell('A2').value = 'Kỳ báo cáo: ' + monthLabel(state.currentMonth) + '  ·  Xuất lúc: ' + nowStr();
   dash.getCell('A2').font = {name:'Arial', size:9, italic:true, color:{argb:'FF57647A'}};
   dash.mergeCells('A2:F2');
+  dash.getCell('A3').value = 'Người lập báo cáo: ' + nguoiLap + '  ·  Lãnh đạo UBND xã: ' + lanhDaoUBND;
+  dash.getCell('A3').font = {name:'Arial', size:9, italic:true, color:{argb:'FF57647A'}};
+  dash.mergeCells('A3:F3');
 
   const overall = statsFor(monthTasks);
-  dash.getCell('A4').value = 'CHỈ SỐ TỔNG QUAN'; dash.getCell('A4').font = {name:'Arial', bold:true, size:11};
-  const kpiHead = dash.getRow(5);
+  dash.getCell('A5').value = 'CHỈ SỐ TỔNG QUAN'; dash.getCell('A5').font = {name:'Arial', bold:true, size:11};
+  const kpiHead = dash.getRow(6);
   ['Tổng công việc','Hoàn thành','Đang thực hiện','Quá hạn','Tỷ lệ hoàn thành'].forEach((h,i)=>{ kpiHead.getCell(i+2).value = h; });
   styleHeader(kpiHead); kpiHead.getCell(1).value=''; 
-  const kpiRow = dash.getRow(6);
+  const kpiRow = dash.getRow(7);
   kpiRow.getCell(2).value = overall.total; kpiRow.getCell(3).value = overall.done; kpiRow.getCell(4).value = overall.doing;
   kpiRow.getCell(5).value = overall.overdue; kpiRow.getCell(6).value = overall.pct/100;
   kpiRow.getCell(6).numFmt = '0.0%';
   for(let c=2;c<=6;c++){ kpiRow.getCell(c).font={name:'Arial',size:16,bold:true,color:{argb:'FF7A1F2E'}}; kpiRow.getCell(c).alignment={horizontal:'center'}; }
-  dash.getRow(6).height = 26;
+  dash.getRow(7).height = 26;
 
-  dash.getCell('A8').value = 'TIẾN ĐỘ THEO PHÒNG, BAN'; dash.getCell('A8').font = {name:'Arial', bold:true, size:11};
-  const deptHeadRow = dash.getRow(9);
+  dash.getCell('A9').value = 'TIẾN ĐỘ THEO PHÒNG, BAN'; dash.getCell('A9').font = {name:'Arial', bold:true, size:11};
+  const deptHeadRow = dash.getRow(10);
   ['Phòng, ban','Tổng số','Hoàn thành','Quá hạn','Tỷ lệ','Biểu đồ tiến độ'].forEach((h,i)=>{ deptHeadRow.getCell(i+1).value=h; });
   styleHeader(deptHeadRow);
-  let r = 10;
+  let r = 11;
   DEPARTMENTS.forEach(d=>{
     const dt = monthTasks.filter(t=>t.dept===d.id);
     const s = statsFor(dt);
@@ -1593,10 +1689,10 @@ async function exportDashboardExcel(){
   });
   // Data bar truc quan tren cot Ty le (E)
   dash.addConditionalFormatting({
-    ref: `E10:E${r-1}`,
+    ref: `E11:E${r-1}`,
     rules: [{type:'dataBar', minLength:0, maxLength:100, gradient:true, border:false, color:{argb:'FFA9822F'}}]
   });
-  styleBody(dash, 10, r-1, 6);
+  styleBody(dash, 11, r-1, 6);
   r += 2;
 
   dash.getCell(`A${r}`).value = 'THỐNG KÊ THEO NĂM (LUỸ KẾ TỪ TRƯỚC ĐẾN NAY)'; dash.getCell(`A${r}`).font = {name:'Arial', bold:true, size:11};
@@ -1613,7 +1709,23 @@ async function exportDashboardExcel(){
     r++;
   });
   styleBody(dash, yearStartRow, r-1, 5);
-  dash.views = [{state:'frozen', ySplit:5}];
+  r += 2;
+
+  // ---- Biểu đồ hình ảnh trực quan (nhúng sẵn, xem được ngay không cần mở lại phần mềm) ----
+  dash.getCell(`A${r}`).value = 'BIỂU ĐỒ TRỰC QUAN'; dash.getCell(`A${r}`).font = {name:'Arial', bold:true, size:11};
+  r += 1;
+  const chartStartRow = r;
+  const { barImg, pieImg } = await buildDashboardCharts(monthTasks);
+  if(barImg){
+    const barImgId = wb.addImage({base64: barImg, extension:'png'});
+    dash.addImage(barImgId, { tl:{col:0, row:r}, ext:{width:480, height:255} });
+  }
+  if(pieImg){
+    const pieImgId = wb.addImage({base64: pieImg, extension:'png'});
+    dash.addImage(pieImgId, { tl:{col:3.3, row:r}, ext:{width:345, height:255} });
+  }
+  r += 16;
+  dash.views = [{state:'frozen', ySplit:6}];
 
   // ---- Sheet theo linh vuc ----
   addFieldStatsSheet(wb, monthTasks);
@@ -1635,11 +1747,14 @@ function addDeptDetailSheet(wb, d){
   const ws = wb.addWorksheet(d.short.slice(0,31));
   ws.columns = [{width:12},{width:5},{width:20},{width:34},{width:34},{width:16},{width:14},{width:16},{width:14},{width:16},{width:16},{width:9},{width:26},{width:34}];
   const headers = ['Tháng','TT','Lĩnh vực','Nội dung','Yêu cầu sản phẩm/kết quả','Thời hạn','Ngày hoàn thành','Trạng thái','Chủ trì','Thực hiện chính','Phối hợp','Điểm','Ghi chú','Kết quả'];
-  addTitle(ws, d.name.toUpperCase(), headers.length);
-  const headRow = ws.getRow(3);
+  addTitle(ws, 'BẢNG THEO DÕI CÔNG VIỆC — ' + d.name.toUpperCase(), headers.length);
+  ws.getCell('A2').value = 'Người lập báo cáo: ' + (getCurrentUser() ? getCurrentUser().name + ' (' + getCurrentUser().chucVu + ')' : 'Khách (chưa đăng nhập)') + '  ·  Lãnh đạo đơn vị: ' + deptLeaderName(d.id);
+  ws.getCell('A2').font = {name:'Arial', size:9, italic:true, color:{argb:'FF57647A'}};
+  ws.mergeCells(2,1,2,headers.length);
+  const headRow = ws.getRow(4);
   headers.forEach((h,i)=>headRow.getCell(i+1).value=h);
   styleHeader(headRow);
-  let r = 4;
+  let r = 5;
   state.tasks.filter(t=>t.dept===d.id).forEach((t,i)=>{
     const row = ws.getRow(r);
     row.getCell(1).value = monthLabel(t.month); row.getCell(2).value = i+1; row.getCell(3).value = t.linhVuc;
@@ -1650,8 +1765,8 @@ function addDeptDetailSheet(wb, d){
     row.eachCell(c=>c.alignment={wrapText:true, vertical:'top'});
     r++;
   });
-  styleBody(ws, 4, r-1, headers.length);
-  ws.views = [{state:'frozen', ySplit:3}];
+  styleBody(ws, 5, r-1, headers.length);
+  ws.views = [{state:'frozen', ySplit:4}];
 }
 function addFieldStatsSheet(wb, monthTasks){
   const ws = wb.addWorksheet('Theo linh vuc');
@@ -1773,7 +1888,167 @@ function renderModal(){
   if(modalMode==='task') return renderTaskModal();
   if(modalMode==='newmonth') return renderNewMonthModal();
   if(modalMode==='login') return renderLoginModal();
+  if(modalMode==='biettuot') return renderBietTuotModal();
+  if(modalMode==='import-excel') return renderImportExcelModal();
   return '';
+}
+
+/* ---------------- BIẾT TUỐT — trợ lý tóm tắt công việc (dựa trên luật/logic có sẵn,
+   KHÔNG gọi mô hình AI sinh ngôn ngữ thật — hoàn toàn miễn phí, chạy ngay trong trình
+   duyệt, không cần internet ngoài hay khoá API nào). ---------------- */
+function generateBietTuot(t){
+  const d = daysUntil(t);
+  const statusLabel = STATUS_META[t.status]?.label || t.status;
+  const parts = [];
+  parts.push(`Đây là việc "${t.noiDung}" — thuộc lĩnh vực "${t.linhVuc}", do ${deptFullName(t.dept)} phụ trách.`);
+  if(t.yeuCau) parts.push(`Yêu cầu sản phẩm / kết quả cần đạt: ${t.yeuCau}.`);
+  if(t.chuTri || t.thucHien){
+    let who = '';
+    if(t.chuTri) who += `chủ trì bởi ${t.chuTri}`;
+    if(t.thucHien && t.thucHien !== t.chuTri) who += (who? ', ':'') + `thực hiện chính là ${t.thucHien}`;
+    parts.push(`Việc này ${who}.`);
+  }
+  if(t.phoiHop) parts.push(`Có sự phối hợp của: ${t.phoiHop}.`);
+  parts.push(`Trạng thái hiện tại: ${statusLabel}.`);
+  if(d !== null){
+    if(d < 0) parts.push(`⚠️ Việc này đã QUÁ HẠN ${Math.abs(d)} ngày so với mốc ${formatVNDate(t.hanHoanThanh)}.`);
+    else if(d === 0) parts.push(`⏰ Việc này ĐẾN HẠN đúng hôm nay (${formatVNDate(t.hanHoanThanh)}).`);
+    else if(d <= 3) parts.push(`🟡 Còn ${d} ngày nữa là đến hạn (${formatVNDate(t.hanHoanThanh)}).`);
+    else parts.push(`Còn ${d} ngày nữa đến hạn dự kiến (${formatVNDate(t.hanHoanThanh)}).`);
+  } else if(t.thoiHan){
+    parts.push(`Thời hạn ghi nhận theo mô tả: "${t.thoiHan}".`);
+  }
+  if(t.minhChung && t.minhChung.length) parts.push(`Đã đính kèm ${t.minhChung.length} tệp kết quả.`);
+  else if(t.status === 'done') parts.push(`Việc đã đánh dấu Hoàn thành nhưng CHƯA có tệp kết quả đính kèm.`);
+  if(t.ghiChu) parts.push(`Ghi chú thêm: ${t.ghiChu}`);
+
+  let suggestion;
+  if(t.status === 'done'){
+    suggestion = t.minhChung && t.minhChung.length ? 'Việc đã hoàn thành và có minh chứng — có thể xem/tải kết quả để kiểm tra, đối chiếu.' : 'Việc đã hoàn thành nhưng chưa có minh chứng — nên bổ sung tệp kết quả để lưu hồ sơ.';
+  } else if(d !== null && d < 0){
+    suggestion = 'Đề xuất: liên hệ ngay cán bộ phụ trách để đôn đốc hoàn thành, hoặc cập nhật lại thời hạn/ghi chú lý do chậm trễ.';
+  } else if(d !== null && d <= 3){
+    suggestion = 'Đề xuất: nhắc cán bộ phụ trách chuẩn bị hoàn thành đúng hạn trong vài ngày tới.';
+  } else {
+    suggestion = 'Chưa cần đôn đốc gấp — tiếp tục theo dõi tiến độ bình thường.';
+  }
+  return { parts, suggestion };
+}
+function renderBietTuotModal(){
+  const t = state.tasks.find(x=>x.id===bietTuotTaskId);
+  if(!t) return '';
+  const { parts, suggestion } = generateBietTuot(t);
+  return `
+  <div class="modal-overlay" data-action="close-modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><h3>🧞 Biết Tuốt nói gì về việc này?</h3><button class="modal-close" data-action="close-modal">×</button></div>
+    <div class="modal-body">
+      <div class="biettuot-box">
+        ${parts.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}
+      </div>
+      <div class="biettuot-suggestion">💡 ${escapeHtml(suggestion)}</div>
+      <p style="font-size:11px; color:var(--ink-faint); margin:2px 0 0;">Biết Tuốt là trợ lý tóm tắt tự động dựa trên dữ liệu công việc — không phải AI trò chuyện thật, không gửi dữ liệu ra ngoài.</p>
+    </div>
+    <div class="modal-foot"><button class="btn" data-action="close-modal">Đóng</button></div>
+  </div>
+  </div>`;
+}
+
+/* ---------------- NHẬP NHIỀU CÔNG VIỆC TỪ EXCEL ---------------- */
+const IMPORT_HEADERS = ['Lĩnh vực','Nội dung công việc','Yêu cầu sản phẩm/kết quả','Thời hạn (mô tả)','Ngày hoàn thành (dd/mm/yyyy)','Trạng thái','Cán bộ chủ trì','Cán bộ thực hiện chính','Cán bộ phối hợp','Điểm','Ghi chú'];
+function downloadImportTemplate(){
+  if(typeof XLSX === 'undefined'){ alert('Không tải được thư viện Excel. Kiểm tra kết nối mạng rồi thử lại.'); return; }
+  const example = ['Tài chính ngân sách','Ví dụ: Tổng hợp thu chi ngân sách trong tháng','Báo cáo số liệu thu/chi cụ thể','20/8/2026','20/08/2026','Chưa thực hiện','Nguyễn Văn A','Nguyễn Văn A','','',''];
+  const note = ['(Xoá dòng ví dụ này trước khi điền dữ liệu thật. Cột Trạng thái chỉ nhập đúng 1 trong 4: Chưa thực hiện / Đang thực hiện / Hoàn thành / Tạm dừng. Cột Ngày hoàn thành theo định dạng dd/mm/yyyy, có thể để trống nếu là việc thường xuyên.)'];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([IMPORT_HEADERS, example, note]);
+  ws['!cols'] = IMPORT_HEADERS.map(()=>({wch:22}));
+  XLSX.utils.book_append_sheet(wb, ws, 'Mau nhap cong viec');
+  XLSX.writeFile(wb, 'Mau-nhap-cong-viec.xlsx');
+}
+function parseImportDate(v){
+  if(!v) return '';
+  const str = String(v).trim();
+  const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  return '';
+}
+function parseStatusLabel(v){
+  const str = String(v||'').trim().toLowerCase();
+  const found = Object.entries(STATUS_META).find(([k,meta])=>meta.label.toLowerCase()===str);
+  return found ? found[0] : 'todo';
+}
+async function handleImportFileSelected(file){
+  if(typeof XLSX === 'undefined'){ alert('Không tải được thư viện đọc Excel. Kiểm tra kết nối mạng rồi thử lại.'); return; }
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    const dataRows = rows.slice(1); // bỏ dòng tiêu đề
+    importedRows = dataRows
+      .filter(r => r[1] && String(r[1]).trim())
+      .map(r => ({
+        linhVuc: String(r[0]||'').trim(),
+        noiDung: String(r[1]||'').trim(),
+        yeuCau: String(r[2]||'').trim(),
+        thoiHan: String(r[3]||'').trim(),
+        hanHoanThanh: parseImportDate(r[4]),
+        status: parseStatusLabel(r[5]),
+        chuTri: String(r[6]||'').trim(),
+        thucHien: String(r[7]||'').trim(),
+        phoiHop: String(r[8]||'').trim(),
+        diem: String(r[9]||'').trim(),
+        ghiChu: String(r[10]||'').trim()
+      }));
+    const prevEl = document.getElementById('import-preview');
+    if(prevEl) prevEl.innerHTML = renderImportPreview();
+    const confirmBtn = document.querySelector('button[data-action="confirm-import-excel"]');
+    if(confirmBtn){
+      confirmBtn.textContent = '➕ Xác nhận nhập ' + importedRows.length + ' công việc';
+      confirmBtn.disabled = importedRows.length === 0;
+    }
+  }catch(e){
+    console.error('Lỗi đọc file Excel:', e);
+    alert('Không đọc được file. Kiểm tra đúng định dạng .xlsx và đúng cấu trúc cột như file mẫu.');
+  }
+}
+function renderImportPreview(){
+  if(!importedRows.length) return `<div class="empty-state" style="padding:20px;"><div class="big">Chưa có dữ liệu xem trước</div>Tải file mẫu, điền dữ liệu rồi chọn lại file đó để xem trước tại đây.</div>`;
+  return `<div class="table-wrap" style="max-height:260px; overflow-y:auto;">
+    <table style="min-width:600px;">
+      <thead><tr><th>Lĩnh vực</th><th>Nội dung công việc</th><th>Thời hạn</th><th>Trạng thái</th></tr></thead>
+      <tbody>${importedRows.map(r=>`<tr><td>${escapeHtml(r.linhVuc)}</td><td>${escapeHtml(r.noiDung)}</td><td>${escapeHtml(r.thoiHan)}</td><td>${escapeHtml(STATUS_META[r.status]?.label||r.status)}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+function renderImportExcelModal(){
+  const allowedDepts = DEPARTMENTS.filter(d=>canEditDept(d.id));
+  const depts = allowedDepts.length ? allowedDepts : DEPARTMENTS;
+  const dept = modalDeptDefault && depts.some(d=>d.id===modalDeptDefault) ? modalDeptDefault : depts[0].id;
+  return `
+  <div class="modal-overlay" data-action="close-modal-overlay">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-head"><h3>📥 Nhập nhiều công việc từ Excel</h3><button class="modal-close" data-action="close-modal">×</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nhập vào phòng, ban</label>
+        <select id="import-dept">${depts.map(d=>`<option value="${d.id}" ${dept===d.id?'selected':''}>${d.name}</option>`).join('')}</select>
+      </div>
+      <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">Bước 1: tải file mẫu Excel. Bước 2: điền dữ liệu theo đúng cột (xoá dòng ví dụ). Bước 3: chọn lại file đã điền để xem trước, kiểm tra rồi bấm Xác nhận nhập.</p>
+      <div class="toolbar" style="margin:2px 0;">
+        <button class="btn small" type="button" data-action="download-import-template">📄 Tải file mẫu Excel</button>
+        <button class="btn small" type="button" data-action="pick-import-file">📤 Chọn file đã điền</button>
+        <input type="file" id="import-file-input" data-action="import-file-selected" accept=".xlsx,.xls" style="display:none">
+      </div>
+      <div id="import-preview">${renderImportPreview()}</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" data-action="close-modal">Huỷ</button>
+      <button class="btn gold" data-action="confirm-import-excel" ${importedRows.length? '' : 'disabled'}>➕ Xác nhận nhập${importedRows.length? ' '+importedRows.length+' công việc' : ''}</button>
+    </div>
+  </div>
+  </div>`;
 }
 
 function renderLoginModal(){
@@ -2037,7 +2312,52 @@ document.addEventListener('click', async (e)=>{
   }
   if(action==='close-modal' || action==='close-modal-overlay'){
     if(action==='close-modal-overlay' && e.target !== el) return;
-    modalMode=null; editingTaskId=null; loginTargetId=null; render(); return;
+    modalMode=null; editingTaskId=null; loginTargetId=null; bietTuotTaskId=null; render(); return;
+  }
+  if(action==='ask-biettuot'){
+    bietTuotTaskId = el.dataset.id;
+    modalMode = 'biettuot';
+    render();
+    return;
+  }
+  if(action==='open-import-excel'){
+    modalMode = 'import-excel';
+    modalDeptDefault = el.dataset.dept;
+    importedRows = [];
+    render();
+    return;
+  }
+  if(action==='download-import-template'){
+    downloadImportTemplate();
+    return;
+  }
+  if(action==='pick-import-file'){
+    const inp = document.getElementById('import-file-input');
+    if(inp) inp.click();
+    return;
+  }
+  if(action==='confirm-import-excel'){
+    const deptSel = document.getElementById('import-dept');
+    const dept = deptSel ? deptSel.value : (modalDeptDefault || DEPARTMENTS[0].id);
+    if(!canEditDept(dept)){ alert('Bạn không có quyền thêm công việc cho đơn vị này.'); return; }
+    if(!importedRows.length){ alert('Chưa có dữ liệu để nhập. Hãy chọn file đã điền trước.'); return; }
+    const who = getMyName();
+    importedRows.forEach(r=>{
+      state.tasks.push({
+        id: newId(dept), dept, month: state.currentMonth,
+        linhVuc: r.linhVuc, noiDung: r.noiDung, yeuCau: r.yeuCau, thoiHan: r.thoiHan, hanHoanThanh: r.hanHoanThanh,
+        status: r.status, chuTri: r.chuTri, thucHien: r.thucHien, phoiHop: r.phoiHop, diem: r.diem, ghiChu: r.ghiChu,
+        minhChung: [], lastEditedBy: who, lastEditedAt: nowStr()
+      });
+    });
+    const count = importedRows.length;
+    logActivity('Nhập Excel hàng loạt', `${count} công việc vào ${deptName(dept)}`);
+    importedRows = [];
+    modalMode = null;
+    await persist();
+    render();
+    alert('Đã nhập thành công ' + count + ' công việc.');
+    return;
   }
   if(action==='pick-minhchung'){
     const inp = document.getElementById('f-minhchung-input');
@@ -2239,6 +2559,11 @@ document.addEventListener('change', async (e)=>{
     const file = el.files && el.files[0];
     if(file) handleMinhChungFileSelected(file);
     el.value = ''; // cho phép chọn lại cùng 1 file lần sau nếu cần
+    return;
+  }
+  if(action==='import-file-selected'){
+    const file = el.files && el.files[0];
+    if(file) handleImportFileSelected(file);
     return;
   }
   if(action==='modal-dept-change'){
